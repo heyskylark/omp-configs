@@ -1,32 +1,104 @@
-# OMP Hstack
+# OMP Configs
 
 Portable, user-level [Oh My Pi](https://github.com/can1357/oh-my-pi) configuration managed with [chezmoi](https://www.chezmoi.io/).
 
-The repository is the source of truth for selected files under `~/.omp/agent`. It intentionally excludes credentials, MCP configuration, sessions, logs, caches, databases, downloaded tools, and machine-specific state.
+## Platform support
+
+This repository supports both Linux and macOS. The managed OMP paths are the same on both platforms:
+
+```text
+~/.omp/agent/config.yml
+~/.omp/agent/AGENTS.md
+~/.omp/agent/keybindings.yml
+```
+
+The committed configuration contains no OS-specific absolute paths. Model roles, themes, composer settings, and keybinding action IDs are portable. Credentials and machine-specific overrides remain local to each machine.
+
+Run `omp config path` after installation to confirm the active agent directory. A named OMP profile or `PI_CODING_AGENT_DIR` can intentionally relocate it. `omp config init-xdg` may separately initialize XDG data, state, and cache directories on Linux or macOS; it does not require a different chezmoi source layout.
+
+This repository is intentionally limited to OMP state that is not installed through plugins:
+
+- `config.yml`, including model/provider selection, `modelRoles`, and portable appearance preferences
+- global `AGENTS.md`
+- `keybindings.yml`, when custom bindings are added
+
+Installable capabilities belong in [`heyskylark/omp-plugins`](https://github.com/heyskylark/omp-plugins). That repository is reserved for skills, custom agents, tools, extensions, commands, rules, prompts, and hooks, following a collection-oriented structure similar to Cursor's plugin repository.
 
 ## Managed files
 
-| Chezmoi source | Local OMP target |
-| --- | --- |
-| `private_dot_omp/private_agent/AGENTS.md` | `~/.omp/agent/AGENTS.md` |
-| `private_dot_omp/private_agent/private_config.yml` | `~/.omp/agent/config.yml` |
+| Chezmoi source | Local OMP target | Purpose |
+| --- | --- | --- |
+| `private_dot_omp/private_agent/private_config.yml` | `~/.omp/agent/config.yml` | Models, role aliases, and portable OMP settings |
+| `private_dot_omp/private_agent/AGENTS.md` | `~/.omp/agent/AGENTS.md` | Global OMP instructions |
+| `private_dot_omp/private_agent/private_keybindings.yml` | `~/.omp/agent/keybindings.yml` | Optional custom keybindings; added when needed |
 
 The `private_` prefixes are chezmoi attributes that preserve private filesystem permissions. They are not part of the target names.
 
-Repository-level `AGENTS.md` and `README.md` are listed in `.chezmoiignore`, so chezmoi does not install them into the home directory.
+The repository-level `AGENTS.md` and `README.md` are listed in `.chezmoiignore`, so chezmoi does not install them into the home directory.
+
+## Division of responsibility
+
+### Keep here
+
+- Portable `config.yml` values
+- Model and provider selection
+- `modelRoles` consumed by plugin-provided custom agents
+- Appearance settings such as theme and composer shape
+- Global, installation-wide instructions in `AGENTS.md`
+- User keybinding overrides in `keybindings.yml`
+
+### Keep in omp-plugins
+
+- Skills and their supporting files
+- Custom task agents
+- Custom tools
+- Runtime extensions
+- Slash commands
+- Capability-specific rules and prompts
+- Hooks
+- Portable MCP or LSP definitions that contain no credentials
+
+### Keep local or project-specific
+
+- Credentials, OAuth state, API keys, and cookies
+- Machine-specific model endpoints and secret-manager commands
+- Work-specific settings and MCP servers
+- Sessions, logs, caches, databases, generated state, and downloaded binaries
 
 ## Prerequisites
 
-Install OMP, Git, and chezmoi. On macOS:
+Install OMP, Git, and chezmoi.
+
+On macOS:
 
 ```sh
 brew install chezmoi
+```
+
+On Linux, use the official installer:
+
+```sh
+sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b ~/.local/bin
+```
+
+Ensure `~/.local/bin` is on `PATH`. Distribution packages are also supported:
+
+```sh
+# Debian or Ubuntu
+sudo apt-get install chezmoi
+
+# Fedora
+sudo dnf install chezmoi
+
+# Arch Linux
+sudo pacman -S chezmoi
 ```
 
 Confirm the installation:
 
 ```sh
 chezmoi --version
+omp config path
 ```
 
 ## Set up a new machine
@@ -36,13 +108,13 @@ chezmoi --version
 Let chezmoi clone the repository into its default source directory and apply it:
 
 ```sh
-chezmoi init --apply https://github.com/heyskylark/omp-hstack.git
+chezmoi init --apply https://github.com/heyskylark/omp-configs.git
 ```
 
 For SSH authentication:
 
 ```sh
-chezmoi init --apply git@github.com:heyskylark/omp-hstack.git
+chezmoi init --apply git@github.com:heyskylark/omp-configs.git
 ```
 
 Inspect the result:
@@ -60,13 +132,13 @@ OMP credentials and service authorizations are deliberately not included. Authen
 Clone the repository:
 
 ```sh
-git clone https://github.com/heyskylark/omp-hstack.git ~/git/omp-hstack
+git clone https://github.com/heyskylark/omp-configs.git ~/git/omp-configs
 ```
 
 Configure chezmoi to use that checkout as its source directory by creating `~/.config/chezmoi/chezmoi.toml`:
 
 ```toml
-sourceDir = "/absolute/path/to/home/git/omp-hstack"
+sourceDir = "/absolute/path/to/home/git/omp-configs"
 
 [git]
 autoAdd = false
@@ -81,23 +153,17 @@ chezmoi apply
 chezmoi status
 ```
 
-## Make local OMP match this repository
+## Synchronize configuration
 
-There are two supported workflows.
+### Make local OMP match this repository
 
-### One-command update
-
-Pull the latest repository revision and apply it:
+Pull and apply in one command:
 
 ```sh
 chezmoi update
 ```
 
-This is the normal command on secondary machines.
-
-### Review before applying
-
-Pull the source repository explicitly, inspect the target changes, then apply:
+To review before applying:
 
 ```sh
 chezmoi git -- pull --ff-only
@@ -105,164 +171,123 @@ chezmoi diff
 chezmoi apply
 ```
 
-A clean result is:
+If a local target has diverged, inspect the difference rather than forcing the update. Use `chezmoi merge <target>` when both source and target contain changes that must be reconciled.
 
-```sh
-chezmoi status
-```
+### Capture local OMP changes
 
-with no output.
-
-To apply only one managed target:
-
-```sh
-chezmoi diff ~/.omp/agent/config.yml
-chezmoi apply ~/.omp/agent/config.yml
-```
-
-If the local target has diverged, chezmoi prompts before overwriting it. Inspect the difference rather than forcing the update. Use `chezmoi merge <target>` when both source and target contain changes that must be reconciled.
-
-## Make this repository match local OMP
-
-Use this workflow after changing OMP through `/settings`, `omp config set`, or direct edits under `~/.omp/agent`.
-
-### Capture an updated managed file
-
-First inspect what changed:
+Inspect and capture only the intended managed target:
 
 ```sh
 chezmoi status
 chezmoi diff ~/.omp/agent/config.yml
-```
-
-Copy the local target back into chezmoi source state:
-
-```sh
 chezmoi add ~/.omp/agent/config.yml
 ```
 
-For the global OMP instructions:
+For global instructions:
 
 ```sh
 chezmoi diff ~/.omp/agent/AGENTS.md
 chezmoi add ~/.omp/agent/AGENTS.md
 ```
 
-Review the repository diff before committing:
+For custom keybindings, once `~/.omp/agent/keybindings.yml` exists:
+
+```sh
+chezmoi diff ~/.omp/agent/keybindings.yml
+chezmoi add ~/.omp/agent/keybindings.yml
+```
+
+Review repository changes before committing:
 
 ```sh
 chezmoi git -- status --short
 chezmoi git -- diff
 ```
 
-Then commit and push from the source repository:
-
-```sh
-chezmoi git -- add .
-chezmoi git -- commit -m "Update OMP configuration"
-chezmoi git -- push
-```
-
-Do not enable automatic commits or pushes. OMP configuration may execute tools, hooks, extensions, and stdio MCP commands; every source change should be reviewed.
+Do not enable automatic commits or pushes.
 
 ### Edit source first
 
-For deliberate changes, editing the chezmoi source and applying it immediately avoids a capture step:
+For deliberate changes, edit and apply the managed target directly:
 
 ```sh
 chezmoi edit --apply ~/.omp/agent/config.yml
-```
-
-The same pattern works for other managed targets:
-
-```sh
 chezmoi edit --apply ~/.omp/agent/AGENTS.md
 ```
 
-Afterward:
+Then inspect both source-to-target and Git differences:
 
 ```sh
 chezmoi diff
 chezmoi git -- diff
 ```
 
-`chezmoi diff` compares source state with local targets. `chezmoi git -- diff` shows changes waiting to be committed in the repository.
+## Model roles and plugin agents
 
-## Add a new managed OMP file
+Concrete model selectors belong under `modelRoles` in `config.yml`. Custom agents distributed through `omp-plugins` should refer to aliases such as `@review` rather than hard-coding a provider and model.
 
-Create the target file in its normal OMP location, then add it to chezmoi:
+This separation allows plugin behavior to remain portable while each OMP installation controls its own model routing.
+
+Credentials remain in OMP auth storage or environment variables, never in either repository.
+
+## Plugin installation and updates
+
+OMP can install plugins from npm, Git, local paths, or a configured marketplace. The `omp-plugins` repository can begin as one Git-installable bundle and later expose a marketplace catalog when it contains independently installable plugins.
+
+Once that repository contains an OMP plugin `package.json`, link it for local development:
 
 ```sh
-chezmoi add ~/.omp/agent/keybindings.yml
+omp plugin link ~/git/omp-plugins
 ```
 
-Examples for custom agents and skills:
+After publishing plugin content, install it directly from Git:
 
 ```sh
-chezmoi add ~/.omp/agent/agents/reviewer.md
-chezmoi add ~/.omp/agent/skills/example/SKILL.md
+omp plugin install github:heyskylark/omp-plugins
 ```
 
-OMP discovers user agents from `~/.omp/agent/agents/*.md`. Skills must use the non-nested layout:
+Direct npm or Git plugins do not have a separate update command. Re-run `omp plugin install` with the desired package version or Git ref to update them.
+
+Marketplace plugins provide an explicit update workflow:
+
+```sh
+omp plugin marketplace update
+omp plugin upgrade
+```
+
+`marketplace update` refreshes marketplace catalogs; it does not reinstall plugins. `plugin upgrade` upgrades installed marketplace plugins. Marketplace startup behavior can also be configured with `marketplace.autoUpdate` as `off`, `notify`, or `auto`.
+
+After changing installed capabilities, run:
 
 ```text
-~/.omp/agent/skills/<skill-name>/SKILL.md
+/reload-plugins
 ```
 
-Supporting scripts, templates, and reference files can live inside the same skill directory and should be added individually or by adding that directory recursively.
-
-Before committing any newly managed path, verify where chezmoi will install it:
-
-```sh
-chezmoi source-path ~/.omp/agent/skills/example/SKILL.md
-chezmoi target-path "$(chezmoi source-path ~/.omp/agent/skills/example/SKILL.md)"
-```
-
-## Model roles and custom agents
-
-Keep agent behavior separate from model selection:
-
-- define concrete model selectors under `modelRoles` in `config.yml`;
-- refer to those roles from agent frontmatter with aliases such as `@review`;
-- keep credentials in OMP auth storage or environment variables, never in this repository.
-
-This allows a model to be changed once without rewriting every agent definition.
+This refreshes skills, slash commands, and MCP servers in the active TUI session. Restart OMP for newly installed tools, hooks, or extension modules.
 
 ## Machine-specific settings
 
 Do not capture hostnames, absolute local paths, local model endpoints, hardware-specific options, or secret-manager commands in the managed `config.yml`.
 
-When a machine needs an OMP-only override, keep it in an unmanaged file such as:
+Keep machine-only overrides in an unmanaged file such as:
 
 ```text
 ~/.config/omp/local.yml
 ```
 
-and load it from that machine's shell environment:
+Load it from that machine's shell environment:
 
 ```sh
 export PI_CONFIG_FILES="$HOME/.config/omp/local.yml"
 ```
 
-`PI_CONFIG_FILES` is a high-precedence overlay and can override project settings. Reserve it for true machine constraints rather than ordinary preferences.
+`PI_CONFIG_FILES` is a high-precedence overlay. Reserve it for genuine machine constraints rather than ordinary preferences.
 
 ## MCP policy
 
-`~/.omp/agent/mcp.json` is intentionally unmanaged. Do not run:
+`~/.omp/agent/mcp.json` is intentionally unmanaged. Do not import it wholesale because it may contain literal credentials or work-specific services.
 
-```sh
-chezmoi add ~/.omp/agent/mcp.json
-```
-
-The existing local file may contain literal credentials or work-specific services.
-
-If portable MCP management is added later, construct a new source file containing only an explicitly reviewed subset. Safe entries should use one of:
-
-- definition-only hosted OAuth endpoints, with credentials retained in local OMP auth storage;
-- environment-variable indirection for tokens;
-- portable stdio commands with reviewed and preferably pinned packages.
-
-Work-specific MCP servers belong in the relevant project's `.omp/mcp.json`. Slack is currently omitted.
+Portable MCP definitions may eventually live in `omp-plugins` when they use hosted OAuth, environment-variable indirection, or reviewed portable commands. Work-specific MCP servers belong in the relevant project's `.omp/mcp.json`.
 
 ## Never manage
 
@@ -293,42 +318,28 @@ Also exclude `.env` files, API keys, tokens, cookies, OAuth client secrets, auth
 
 ## Routine checks
 
-### Is the local OMP configuration synchronized?
+Check source-to-target synchronization:
 
 ```sh
 chezmoi status
 chezmoi diff
 ```
 
-No output means the managed targets match chezmoi source state.
-
-### Does the repository have unpublished changes?
+Check unpublished repository changes:
 
 ```sh
 chezmoi git -- status --short --branch
 chezmoi git -- diff
 ```
 
-### Which paths are managed?
-
-```sh
-chezmoi managed --path-style absolute
-```
-
-### Does OMP load the expected configuration?
+Check OMP configuration loading:
 
 ```sh
 omp config path
+omp config get modelRoles --json
 omp config get theme.dark --json
 ```
 
-### Final pre-push review
+Use `/hotkeys` in OMP to verify custom keybindings and inspect the interactive surface after changing appearance settings.
 
-```sh
-chezmoi status
-chezmoi diff
-chezmoi git -- diff --check
-chezmoi git -- status --short --branch
-```
-
-Inspect the complete staged diff and verify that it contains no credentials or machine-specific information before pushing.
+Before pushing, inspect the complete diff and verify that it contains no credentials or machine-specific information.

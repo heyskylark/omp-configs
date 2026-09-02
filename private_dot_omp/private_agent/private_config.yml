@@ -1,0 +1,33 @@
+symbolPreset: unicode
+theme:
+  dark: titanium
+setupVersion: 2
+modelRoles:
+  default: openai-codex/gpt-5.6-sol:high
+  smol: openai-codex/gpt-5.6-terra:medium
+  slow: openai-codex/gpt-5.6-sol:xhigh
+  plan: openai-codex/gpt-5.6-sol:max
+  commit: openai-codex/gpt-5.6-luna:low
+  task: openai-codex/gpt-5.6-sol:medium
+  designer: anthropic/claude-opus-5:xhigh
+  tiny: openai-codex/gpt-5.6-luna:low
+  vision: openai-codex/gpt-5.6-sol:medium
+  advisor: openai-codex/gpt-5.6-sol:medium
+dev:
+  autoqaConsent: granted
+stt:
+  modelName: parakeet
+  enabled: true
+tts:
+  localModel: kokoro
+task:
+  isolation:
+    mode: auto
+composer:
+  shape: box
+browser:
+  relay: false
+compaction:
+  enabled: true
+  thresholdPercent: 75
+  midTurnEnabled: true

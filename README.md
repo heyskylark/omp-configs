@@ -232,30 +232,27 @@ Credentials remain in OMP auth storage or environment variables, never in either
 
 ## Plugin installation and updates
 
-OMP can install plugins from npm, Git, local paths, or a configured marketplace. The `omp-plugins` repository can begin as one Git-installable bundle and later expose a marketplace catalog when it contains independently installable plugins.
-
-Once that repository contains an OMP plugin `package.json`, link it for local development:
+[`heyskylark/omp-plugins`](https://github.com/heyskylark/omp-plugins) is an OMP-native marketplace of independently installable stacks. Add it and install HStack:
 
 ```sh
-omp plugin link ~/git/omp-plugins
+omp plugin marketplace add heyskylark/omp-plugins
+omp plugin install hstack@omp-plugins
 ```
 
-After publishing plugin content, install it directly from Git:
+For local plugin development:
 
 ```sh
-omp plugin install github:heyskylark/omp-plugins
+omp plugin link ~/git/omp-plugins/hstack
 ```
 
-Direct npm or Git plugins do not have a separate update command. Re-run `omp plugin install` with the desired package version or Git ref to update them.
-
-Marketplace plugins provide an explicit update workflow:
+Refresh the catalog and upgrade HStack with:
 
 ```sh
-omp plugin marketplace update
-omp plugin upgrade
+omp plugin marketplace update omp-plugins
+omp plugin upgrade hstack@omp-plugins
 ```
 
-`marketplace update` refreshes marketplace catalogs; it does not reinstall plugins. `plugin upgrade` upgrades installed marketplace plugins. Marketplace startup behavior can also be configured with `marketplace.autoUpdate` as `off`, `notify`, or `auto`.
+`marketplace update` refreshes marketplace metadata; it does not reinstall plugins. `plugin upgrade` installs the newer declared version. Marketplace startup behavior can also be configured with `marketplace.autoUpdate` as `off`, `notify`, or `auto`.
 
 After changing installed capabilities, run:
 
@@ -263,7 +260,7 @@ After changing installed capabilities, run:
 /reload-plugins
 ```
 
-This refreshes skills, slash commands, and MCP servers in the active TUI session. Restart OMP for newly installed tools, hooks, or extension modules.
+This refreshes skills, slash commands, and MCP servers in the active TUI session. Restart OMP for changed agents, tools, hooks, or extension modules.
 
 ## Machine-specific settings
 

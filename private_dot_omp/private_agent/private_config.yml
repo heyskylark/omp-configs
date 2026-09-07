@@ -3,15 +3,15 @@ theme:
   dark: titanium
 setupVersion: 2
 modelRoles:
-  default: openai-codex/gpt-6-astra:high
+  default: openai-codex/gpt-6-astra:medium
   smol: openai-codex/gpt-5.6-terra:medium
-  slow: openai-codex/gpt-6-astra:xhigh
-  plan: openai-codex/gpt-6-astra:max
+  slow: openai-codex/gpt-6-astra:high
+  plan: openai-codex/gpt-6-astra:xhigh
   commit: openai-codex/gpt-5.6-luna:low
-  task: openai-codex/gpt-6-astra:medium
+  task: openai-codex/gpt-6-astra:low
   designer: anthropic/claude-opus-5:xhigh
   tiny: openai-codex/gpt-5.6-luna:low
-  vision: openai-codex/gpt-6-astra:medium
+  vision: openai-codex/gpt-6-astra:low
   advisor: openai-codex/gpt-5.6-sol:medium
   verifier: openai-codex/gpt-5.6-sol:xhigh
 dev:

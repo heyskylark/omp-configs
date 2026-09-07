@@ -3,15 +3,15 @@ theme:
   dark: titanium
 setupVersion: 2
 modelRoles:
-  default: openai-codex/gpt-5.6-sol:high
-  smol: google/gemini-3.8-flash:low
-  slow: openai-codex/gpt-5.6-sol:high
-  plan: openai-codex/gpt-5.6-sol:max
+  default: openai-codex/gpt-6-astra:high
+  smol: openai-codex/gpt-5.6-terra:medium
+  slow: openai-codex/gpt-6-astra:xhigh
+  plan: openai-codex/gpt-6-astra:max
   commit: openai-codex/gpt-5.6-luna:low
-  task: google/gemini-3.8-flash:high
+  task: openai-codex/gpt-6-astra:medium
   designer: anthropic/claude-opus-5:xhigh
   tiny: openai-codex/gpt-5.6-luna:low
-  vision: openai-codex/gpt-5.6-sol:medium
+  vision: openai-codex/gpt-6-astra:medium
   advisor: openai-codex/gpt-5.6-sol:medium
   verifier: openai-codex/gpt-5.6-sol:xhigh
 dev:
